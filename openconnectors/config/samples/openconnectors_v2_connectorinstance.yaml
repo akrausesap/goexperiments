@@ -1,0 +1,10 @@
+apiVersion: openconnectors.incubator.kyma-project.io/v1
+kind: ConnectorInstance
+metadata:
+  name: connectorinstance-sample
+spec:
+  displayName: "Open Connectors Trial"
+  refreshIntervalSeconds: 30
+  hostName: "api.openconnectors.ext.hanatrial.ondemand.com"
+  organizationSecret: "your secret
+  userSecret: "your secret"

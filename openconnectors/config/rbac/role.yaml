@@ -1,0 +1,39 @@
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  creationTimestamp: null
+  name: manager-role
+rules:
+- apiGroups:
+  - openconnectors.incubator.kyma-project.io
+  resources:
+  - connectorinstances
+  verbs:
+  - get
+  - list
+  - watch
+  - create
+  - update
+  - patch
+  - delete
+- apiGroups:
+  - openconnectors.incubator.kyma-project.io
+  resources:
+  - connectorinstances/status
+  verbs:
+  - get
+  - update
+  - patch
+- apiGroups:
+  - applicationconnector.kyma-project.io
+  resources:
+  - applications
+  verbs:
+  - get
+  - update
+  - patch
+  - create
+  - list
+  - watch
