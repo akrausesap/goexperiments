@@ -8,7 +8,7 @@ It uses Kubebuilder (https://github.com/kubernetes-sigs/kubebuilder) and Go Swag
 
 ## Installation
 
-There is currently no ready made installer or helm char available. The only safe way is to clone the repository and run
+There is currently no ready made installer or helm chart available. The only safe way is to clone the repository and run
 
 ```
 make install
@@ -26,7 +26,7 @@ make deploy
 
 for testing in cluster.
 
-If you want to test w/o full kyma deployed. First run `kubectl apply -f config/kyma/application.yaml`. Otherwise Kyma 1.2 is a prerequisite.
+Kyma 1.2 is a prerequisite.
 
 ## Development
 

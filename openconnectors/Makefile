@@ -22,7 +22,8 @@ manager: generate fmt vet
 
 # Run against the configured Kubernetes cluster in ~/.kube/config
 run: generate fmt vet
-	go run ./main.go 
+	kubectl port-forward -n kyma-integration svc/application-registry-external-api 8081 &
+	go run ./main.go -registry-host localhost:8081
 
 # Install CRDs into a cluster
 install: manifests
