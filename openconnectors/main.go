@@ -46,9 +46,13 @@ func init() {
 
 func main() {
 	var metricsAddr string
+	var applicationRegistryHost string
+	var tlsRegistry bool
 	flag.StringVar(&metricsAddr, "metrics-addr", ":8080", "The address the metric endpoint binds to.")
+	flag.StringVar(&applicationRegistryHost, "registry-host", "application-registry-external-api.kyma-integration.svc.cluster.local:8081",
+		"The host of the apllication registry API")
+	flag.BoolVar(&tlsRegistry, "tls", false, "indicates that the registry-host requires tls / https")
 	flag.Parse()
-
 	ctrl.SetLogger(zap.Logger(true))
 
 	mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), ctrl.Options{Scheme: scheme, MetricsBindAddress: metricsAddr})
@@ -61,9 +65,11 @@ func main() {
 
 	events := make(chan event.GenericEvent)
 	err = (&controllers.ConnectorInstanceReconciler{
-		Client: mgr.GetClient(),
-		Log:    ctrl.Log.WithName("controllers").WithName("ConnectorInstance"),
-		Events: events,
+		Client:                  mgr.GetClient(),
+		Log:                     ctrl.Log.WithName("controllers").WithName("ConnectorInstance"),
+		Events:                  events,
+		ApplicationRegistryHost: applicationRegistryHost,
+		TLS:                     tlsRegistry,
 	}).SetupWithManager(mgr)
 	if err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "ConnectorInstance")

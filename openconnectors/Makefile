@@ -6,8 +6,11 @@ CRD_OPTIONS ?= "crd:trivialVersions=true"
 
 all: manager
 
-# Generate Swagger Client
-swagger:; swagger generate client -f ./util/connectorclient/open_connectors_instances_swagger.json -t ./util/connectorclient --default-scheme=https
+# Generate Swagger Client for SAP CP Open Connectors
+swagger-openconnectors:; swagger generate client -f ./util/connectorclient/open_connectors_instances_swagger.json -t ./util/connectorclient --default-scheme=https
+
+# Generate Swagger Client for Kyma Application Registry
+swagger-app-registry:; swagger generate client -f ./util/registryclient/application_registry_swagger-Swagger20.json -t ./util/registryclient --default-scheme=http
 
 # Run tests
 test: generate fmt vet manifests
@@ -19,7 +22,7 @@ manager: generate fmt vet
 
 # Run against the configured Kubernetes cluster in ~/.kube/config
 run: generate fmt vet
-	go run ./main.go
+	go run ./main.go 
 
 # Install CRDs into a cluster
 install: manifests

@@ -46,13 +46,14 @@ spec:
       containers:
       - command:
         - /manager
+        args: ["-registry-host", "application-registry-external-api.kyma-integration.svc.cluster.local:8081", "-tls"]
         image: controller:latest
         imagePullPolicy: Always
         name: manager
         resources:
           limits:
             cpu: 100m
-            memory: 30Mi
+            memory: 200Mi
           requests:
             cpu: 100m
             memory: 20Mi

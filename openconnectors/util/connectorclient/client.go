@@ -2,6 +2,7 @@ package connectorclient
 
 import (
 	"fmt"
+	"strconv"
 	"time"
 
 	httptransport "github.com/go-openapi/runtime/client"
@@ -19,6 +20,35 @@ type ConnectorInstance struct {
 	ConnectorName string
 }
 
+func createAuthorizationHeader(userSecret string, orgSecret string) string {
+	return fmt.Sprintf("User %s, Organization %s", userSecret, orgSecret)
+}
+
+// GetConnectorAPISpecification retrieves the Swagger File from Open Connectors
+func GetConnectorAPISpecification(host string, userSecret string, orgSecret string, connectorInstanceID string) (apiSpecification interface{}, err error) {
+	transport := httptransport.New(host, "/elements/api-v2/", []string{"https"})
+	client := apiclient.New(transport, strfmt.Default)
+
+	params := instances.NewGetInstancesDocs2Params()
+	var connectorInstanceIDInt64 int64
+	if connectorInstanceIDInt64, err = strconv.ParseInt(connectorInstanceID, 10, 64); err != nil {
+		return
+	}
+
+	params.SetTimeout(30 * time.Second)
+	params.SetID(connectorInstanceIDInt64)
+	params.SetAuthorization(createAuthorizationHeader(userSecret, orgSecret))
+
+	instancedocs, err := client.Instances.GetInstancesDocs2(params)
+
+	if err != nil {
+		return
+	}
+	apiSpecification = instancedocs.Payload
+
+	return
+}
+
 // GetConnectorInstances retrieves a list of registered Connector Instances for an SAP CP Open Connectors
 // Tenant
 func GetConnectorInstances(host string, userSecret string, orgSecret string, tags []string) (connectorInstances []ConnectorInstance, err error) {
@@ -28,9 +58,9 @@ func GetConnectorInstances(host string, userSecret string, orgSecret string, tag
 
 	params := instances.NewGetInstancesParams()
 
-	params.SetAuthorization(fmt.Sprintf("User %s, Organization %s", userSecret, orgSecret))
+	params.SetAuthorization(createAuthorizationHeader(userSecret, orgSecret))
 	params.SetTags(tags)
-	params.SetTimeout(10 * time.Second)
+	params.SetTimeout(30 * time.Second)
 
 	elementInstanceList, err := client.Instances.GetInstances(params)
 

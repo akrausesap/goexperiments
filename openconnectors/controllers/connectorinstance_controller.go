@@ -23,6 +23,8 @@ import (
 
 	"github.com/akrausesap/goexperiments/openconnectors/util/connectorclient"
 	"github.com/akrausesap/goexperiments/openconnectors/util/reconciletrigger"
+	"github.com/akrausesap/goexperiments/openconnectors/util/registryclient"
+	"github.com/prometheus/common/log"
 
 	"k8s.io/apimachinery/pkg/types"
 
@@ -43,26 +45,33 @@ import (
 // ConnectorInstanceReconciler reconciles a ConnectorInstance object
 type ConnectorInstanceReconciler struct {
 	client.Client
-	Log    logr.Logger
-	Events chan event.GenericEvent
+	Log                     logr.Logger
+	Events                  chan event.GenericEvent
+	ApplicationRegistryHost string
+	TLS                     bool
+}
+
+type applicationresult struct {
+	err     error
+	appname string
 }
 
 //cache of all reconcilers
-var recociletriggers map[types.NamespacedName]reconciletrigger.ReconcileTrigger = make(map[types.NamespacedName]reconciletrigger.ReconcileTrigger)
+var recociletriggers map[types.NamespacedName]*reconciletrigger.ReconcileTrigger = make(map[types.NamespacedName]*reconciletrigger.ReconcileTrigger)
 var mutex = &sync.Mutex{}
 
 // +kubebuilder:rbac:groups=openconnectors.incubator.kyma-project.io,resources=connectorinstances,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=openconnectors.incubator.kyma-project.io,resources=connectorinstances/status,verbs=get;update;patch
 // +kubebuilder:rbac:groups=applicationconnector.kyma-project.io,resources=applications,verbs=get;update;patch;create;list;watch
 
-func createOpenConnectorsAuthorizationHeader(userSecret string, orgSecret string, APIKey string) (result *map[string][]string) {
-	header := make(map[string][]string)
+func createOpenConnectorsAuthorizationHeader(userSecret string, orgSecret string, APIKey string) (result map[string]interface{}) {
+	header := make(map[string]interface{})
 
 	header["Authorization"] = []string{
 		fmt.Sprintf("User %s, Organization %s, Element %s",
 			userSecret, orgSecret, APIKey),
 	}
-	return &header
+	return header
 }
 
 func createApplicationName(openConnectorsInstanceName string, openConnectorsInstanceID string) string {
@@ -85,36 +94,120 @@ func (r *ConnectorInstanceReconciler) setConnectorStatusError(ctx context.Contex
 	return r.setConnectorStatus(ctx, connectorInstance)
 }
 
+func (r *ConnectorInstanceReconciler) createApllicationWithMetadata(ctx context.Context, connectorInstance connectorclient.ConnectorInstance,
+	connector *openconnectors.ConnectorInstance, ownerLabels *map[string]string, result chan<- applicationresult) {
+	applicationName := createApplicationName(connector.Name, connectorInstance.ID)
+
+	application := applicationoperator.Application{
+		TypeMeta: metav1.TypeMeta{
+			Kind:       "Application",
+			APIVersion: "applicationconnector.kyma-project.io/v1alpha1",
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Name:   applicationName,
+			Labels: *ownerLabels,
+			OwnerReferences: []metav1.OwnerReference{
+				metav1.OwnerReference{
+					APIVersion: connector.APIVersion,
+					Kind:       connector.Kind,
+					Name:       connector.Name,
+					UID:        connector.UID,
+				},
+			},
+		},
+
+		Spec: applicationoperator.ApplicationSpec{
+			Description: fmt.Sprintf("SAP CP Open Connectors - %s - %s", connectorInstance.ConnectorName, connectorInstance.Name),
+			Services:    []applicationoperator.Service{},
+		}}
+
+	if err := r.Create(ctx, &application); err != nil {
+		log.Error(err, fmt.Sprintf("unable to create Application for %s / %s",
+			connectorInstance.ID, connectorInstance.Name))
+		result <- applicationresult{
+			err:     err,
+			appname: applicationName,
+		}
+		return
+	}
+
+	apiSpecification, err := connectorclient.GetConnectorAPISpecification(connector.Spec.Host, connector.Spec.UserSecret,
+		connector.Spec.OrganizationSecret, connectorInstance.ID)
+
+	if err != nil {
+		log.Error(err, fmt.Sprintf("unable to retrieve API Metadata (Swagger) for %s / %s / %s",
+			connectorInstance.ID, connectorInstance.Name, connectorInstance.ID))
+		result <- applicationresult{
+			err:     err,
+			appname: applicationName,
+		}
+		return
+	}
+
+	err = registryclient.RegisterAPIMetadata(r.TLS, r.ApplicationRegistryHost, applicationName,
+		fmt.Sprintf("SAP CP Open Connectors - %s - %s", connector.Spec.DisplayName, connectorInstance.ConnectorName),
+		fmt.Sprintf("SAP CP Open Connectors - %s - %s - %s", connector.Spec.DisplayName, connectorInstance.ConnectorName, connectorInstance.Name),
+		fmt.Sprintf("SAP CP Open Connectors - %s - %s - %s", connector.Spec.DisplayName, connectorInstance.ConnectorName, connectorInstance.Name),
+		connectorInstance.ID,
+		fmt.Sprintf("https://%s/elements/api-v2/", connector.Spec.Host), apiSpecification,
+		createOpenConnectorsAuthorizationHeader(connector.Spec.UserSecret, connector.Spec.OrganizationSecret, connectorInstance.APIKey))
+
+	if err != nil {
+		log.Error(err, fmt.Sprintf("unable to register API Metadata for %s / %s / %s",
+			connectorInstance.ID, connectorInstance.Name, connectorInstance.ID))
+		result <- applicationresult{
+			err:     err,
+			appname: applicationName,
+		}
+		return
+	}
+
+	result <- applicationresult{
+		err:     nil,
+		appname: applicationName,
+	}
+}
+
 func (r *ConnectorInstanceReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
+
 	ctx := context.Background()
 	log := r.Log.WithValues("connectorinstance", req.NamespacedName)
 
 	var connector openconnectors.ConnectorInstance
 	if err := r.Get(ctx, req.NamespacedName, &connector); err != nil {
-		log.Error(err, "unable to fetch ConnectorInstance")
+
 		// we'll ignore not-found errors, since they can't be fixed by an immediate
 		// requeue (we'll need to wait for a new notification), and we can get them
 		// on deleted requests.
 		if apierrs.IsNotFound(err) {
-			//clean cache and leave, even if nothing is in there
 			mutex.Lock()
+			//clean cache and leave, even if nothing is in there
+			if trigger := recociletriggers[req.NamespacedName]; trigger.IsInitialized() {
+				trigger.Stop()
+			}
 			delete(recociletriggers, req.NamespacedName)
 			mutex.Unlock()
 			return ctrl.Result{Requeue: false}, nil
 		} else {
+			log.Error(err, "unable to fetch ConnectorInstance")
+
 			return ctrl.Result{Requeue: true}, err
 		}
 	}
-
-	//Check for and stop reconciletriggers (can be the case if reconciler was triggered through change to resource)
 	mutex.Lock()
-	trigger := recociletriggers[req.NamespacedName]
-	if trigger.IsInitialized() {
-		trigger.Stop()
+	//Check for and stop reconciletriggers (can be the case if reconciler was triggered through change to resource)
+	var trigger *reconciletrigger.ReconcileTrigger
+	if existingTrigger, ok := recociletriggers[req.NamespacedName]; ok {
+		trigger = existingTrigger
+		if trigger.IsInitialized() {
+			trigger.Stop()
+		}
 	} else {
-		trigger = reconciletrigger.NewReconcileTrigger(r.Events, log, connector)
-		recociletriggers[req.NamespacedName] = trigger
+		triggerObj := reconciletrigger.NewReconcileTrigger(r.Events, log, connector)
+		recociletriggers[req.NamespacedName] = &triggerObj
+		trigger = &triggerObj
 	}
+
 	mutex.Unlock()
 
 	//Read Connector Instances from Open Connectors
@@ -167,58 +260,47 @@ func (r *ConnectorInstanceReconciler) Reconcile(req ctrl.Request) (ctrl.Result, 
 		}
 	}
 
+	if connector.Status.OwnedApplicationList == nil {
+		connector.Status.OwnedApplicationList = []string{}
+	}
+
+	resultChannel := make(chan applicationresult)
 	for _, connectorInstance := range *connectorInstancesToCreate {
-		applicationName := createApplicationName(connector.Name, connectorInstance.ID)
-		application := applicationoperator.Application{
-			TypeMeta: metav1.TypeMeta{
-				Kind:       "Application",
-				APIVersion: "applicationconnector.kyma-project.io/v1alpha1",
-			},
-			ObjectMeta: metav1.ObjectMeta{
-				Name:   applicationName,
-				Labels: ownerLabels,
-				OwnerReferences: []metav1.OwnerReference{
-					metav1.OwnerReference{
-						APIVersion: connector.APIVersion,
-						Kind:       connector.Kind,
-						Name:       connector.Name,
-						UID:        connector.UID,
-					},
-				},
-			},
+		go r.createApllicationWithMetadata(ctx, connectorInstance, &connector, &ownerLabels, resultChannel)
+	}
 
-			Spec: applicationoperator.ApplicationSpec{
-				Services: []applicationoperator.Service{
-					applicationoperator.Service{
-						Name: connectorInstance.ID,
-						DisplayName: fmt.Sprintf("%s - %s - %s",
-							connector.Spec.DisplayName,
-							connectorInstance.ConnectorName,
-							connectorInstance.Name),
-						Entries: []applicationoperator.Entry{
-							applicationoperator.Entry{
-								TargetUrl: fmt.Sprintf("https://%s/elements/api-v2/", connector.Spec.Host),
-								SpecificationUrl: fmt.Sprintf("https://%s/elements/api-v2/instances/%s/docs",
-									connector.Spec.Host, connectorInstance.ID),
-								Headers: createOpenConnectorsAuthorizationHeader(
-									connector.Spec.OrganizationSecret,
-									connector.Spec.UserSecret,
-									connectorInstance.APIKey),
-								Type: "API",
-							},
-						},
-					},
-				},
-			}}
+	count := 0
+	isError := false
+	isTimeout := false
 
-		if err := r.Create(ctx, &application); err != nil {
-			log.Error(err, fmt.Sprintf("unable to create Application for %s / %s",
-				connectorInstance.ID, connectorInstance.Name))
-			r.setConnectorStatusError(ctx, &connector, err.Error())
-			return ctrl.Result{Requeue: true}, err
+	for {
+
+		if count < len(*connectorInstancesToCreate) || isTimeout {
+			select {
+			case result := <-resultChannel:
+				count++
+
+				if result.err != nil {
+					isError = true
+					err = result.err
+				} else {
+					connector.Status.OwnedApplicationList = append(connector.Status.OwnedApplicationList, result.appname)
+				}
+			case <-time.After(120 * time.Second):
+				isTimeout = true
+				isError = true
+				err = fmt.Errorf("Creation of applications timed out after 120 seconds, %d out of %d created for %s",
+					count, len(*connectorInstancesToCreate), connector.Name)
+			default:
+			}
+		} else {
+			break
 		}
+	}
 
-		connector.Status.OwnedApplicationList = append(connector.Status.OwnedApplicationList, applicationName)
+	if isError {
+		r.setConnectorStatusError(ctx, &connector, err.Error())
+		return ctrl.Result{Requeue: true}, err
 	}
 
 	//Set Status

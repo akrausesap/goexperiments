@@ -70,21 +70,25 @@ func (rt *ReconcileTrigger) Start(duration time.Duration) error {
 			}
 		}
 		rt.mutex.Lock()
-		close(rt.communication)
-		rt.communication = nil
+		if rt.communication != nil {
+			close(rt.communication)
+			rt.communication = nil
+		}
 		rt.mutex.Unlock()
 	}()
 	return nil
 }
 
-//Stop an event triggger (withouit actuakly pulling the trigger)
+//Stop an event triggger (without actually pulling the trigger)
 func (rt *ReconcileTrigger) Stop() error {
+
 	if !rt.initialized {
 		return errors.New("ReconcileTrigger is not initialized")
 	}
 	rt.mutex.Lock()
 	if rt.communication != nil {
 		close(rt.communication)
+
 	}
 	rt.mutex.Unlock()
 	return nil
