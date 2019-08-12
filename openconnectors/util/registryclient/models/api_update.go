@@ -13,7 +13,7 @@ import (
 	"github.com/go-openapi/validate"
 )
 
-// APIUpdate ApiUpdate
+// APIUpdate Api update
 // swagger:model ApiUpdate
 type APIUpdate struct {
 
@@ -21,7 +21,8 @@ type APIUpdate struct {
 	APIType string `json:"ApiType,omitempty"`
 
 	// specification Url
-	SpecificationURL string `json:"SpecificationUrl,omitempty"`
+	// Format: uri
+	SpecificationURL strfmt.URI `json:"SpecificationUrl,omitempty"`
 
 	// credentials
 	Credentials *APICredentialsUpdate `json:"credentials,omitempty"`
@@ -31,12 +32,17 @@ type APIUpdate struct {
 
 	// target Url
 	// Required: true
-	TargetURL *string `json:"targetUrl"`
+	// Format: uri
+	TargetURL *strfmt.URI `json:"targetUrl"`
 }
 
 // Validate validates this Api update
 func (m *APIUpdate) Validate(formats strfmt.Registry) error {
 	var res []error
+
+	if err := m.validateSpecificationURL(formats); err != nil {
+		res = append(res, err)
+	}
 
 	if err := m.validateCredentials(formats); err != nil {
 		res = append(res, err)
@@ -49,6 +55,19 @@ func (m *APIUpdate) Validate(formats strfmt.Registry) error {
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
+	return nil
+}
+
+func (m *APIUpdate) validateSpecificationURL(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.SpecificationURL) { // not required
+		return nil
+	}
+
+	if err := validate.FormatOf("SpecificationUrl", "body", "uri", m.SpecificationURL.String(), formats); err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -73,6 +92,10 @@ func (m *APIUpdate) validateCredentials(formats strfmt.Registry) error {
 func (m *APIUpdate) validateTargetURL(formats strfmt.Registry) error {
 
 	if err := validate.Required("targetUrl", "body", m.TargetURL); err != nil {
+		return err
+	}
+
+	if err := validate.FormatOf("targetUrl", "body", "uri", m.TargetURL.String(), formats); err != nil {
 		return err
 	}
 

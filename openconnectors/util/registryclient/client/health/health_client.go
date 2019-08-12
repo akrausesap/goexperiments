@@ -25,32 +25,30 @@ type Client struct {
 }
 
 /*
-V1HealthGet gets health
-
-Returns health of a service
+GetHealth returns health of a service
 */
-func (a *Client) V1HealthGet(params *V1HealthGetParams) (*V1HealthGetOK, error) {
+func (a *Client) GetHealth(params *GetHealthParams) (*GetHealthOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
-		params = NewV1HealthGetParams()
+		params = NewGetHealthParams()
 	}
 
 	result, err := a.transport.Submit(&runtime.ClientOperation{
-		ID:                 "V1HealthGet",
+		ID:                 "getHealth",
 		Method:             "GET",
 		PathPattern:        "/v1/health",
-		ProducesMediaTypes: []string{"application/json"},
-		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"https"},
+		ProducesMediaTypes: []string{""},
+		ConsumesMediaTypes: []string{""},
+		Schemes:            []string{"http"},
 		Params:             params,
-		Reader:             &V1HealthGetReader{formats: a.formats},
+		Reader:             &GetHealthReader{formats: a.formats},
 		Context:            params.Context,
 		Client:             params.HTTPClient,
 	})
 	if err != nil {
 		return nil, err
 	}
-	return result.(*V1HealthGetOK), nil
+	return result.(*GetHealthOK), nil
 
 }
 

@@ -11,7 +11,7 @@ import (
 	"github.com/go-openapi/swag"
 )
 
-// CertificateGenUpdate CertificateGenUpdate
+// CertificateGenUpdate certificate gen update
 // swagger:model CertificateGenUpdate
 type CertificateGenUpdate struct {
 

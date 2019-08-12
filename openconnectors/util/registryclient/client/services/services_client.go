@@ -25,152 +25,142 @@ type Client struct {
 }
 
 /*
-V1MetadataServicesByServiceIDDelete deletes service by service Id
-
-Deletes a service by service ID
+DeleteServiceByServiceID deletes a service by service ID
 */
-func (a *Client) V1MetadataServicesByServiceIDDelete(params *V1MetadataServicesByServiceIDDeleteParams) (*V1MetadataServicesByServiceIDDeleteNoContent, error) {
+func (a *Client) DeleteServiceByServiceID(params *DeleteServiceByServiceIDParams) (*DeleteServiceByServiceIDNoContent, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
-		params = NewV1MetadataServicesByServiceIDDeleteParams()
+		params = NewDeleteServiceByServiceIDParams()
 	}
 
 	result, err := a.transport.Submit(&runtime.ClientOperation{
-		ID:                 "V1MetadataServicesByServiceIdDelete",
+		ID:                 "deleteServiceByServiceId",
 		Method:             "DELETE",
 		PathPattern:        "/v1/metadata/services/{serviceId}",
-		ProducesMediaTypes: []string{"application/json"},
-		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"https"},
+		ProducesMediaTypes: []string{""},
+		ConsumesMediaTypes: []string{""},
+		Schemes:            []string{"http"},
 		Params:             params,
-		Reader:             &V1MetadataServicesByServiceIDDeleteReader{formats: a.formats},
+		Reader:             &DeleteServiceByServiceIDReader{formats: a.formats},
 		Context:            params.Context,
 		Client:             params.HTTPClient,
 	})
 	if err != nil {
 		return nil, err
 	}
-	return result.(*V1MetadataServicesByServiceIDDeleteNoContent), nil
+	return result.(*DeleteServiceByServiceIDNoContent), nil
 
 }
 
 /*
-V1MetadataServicesByServiceIDGet gets service by service Id
-
-Gets a service by service ID
+GetServiceByServiceID gets a service by service ID
 */
-func (a *Client) V1MetadataServicesByServiceIDGet(params *V1MetadataServicesByServiceIDGetParams) (*V1MetadataServicesByServiceIDGetOK, error) {
+func (a *Client) GetServiceByServiceID(params *GetServiceByServiceIDParams) (*GetServiceByServiceIDOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
-		params = NewV1MetadataServicesByServiceIDGetParams()
+		params = NewGetServiceByServiceIDParams()
 	}
 
 	result, err := a.transport.Submit(&runtime.ClientOperation{
-		ID:                 "V1MetadataServicesByServiceIdGet",
+		ID:                 "getServiceByServiceId",
 		Method:             "GET",
 		PathPattern:        "/v1/metadata/services/{serviceId}",
-		ProducesMediaTypes: []string{"application/json"},
-		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"https"},
+		ProducesMediaTypes: []string{""},
+		ConsumesMediaTypes: []string{""},
+		Schemes:            []string{"http"},
 		Params:             params,
-		Reader:             &V1MetadataServicesByServiceIDGetReader{formats: a.formats},
+		Reader:             &GetServiceByServiceIDReader{formats: a.formats},
 		Context:            params.Context,
 		Client:             params.HTTPClient,
 	})
 	if err != nil {
 		return nil, err
 	}
-	return result.(*V1MetadataServicesByServiceIDGetOK), nil
+	return result.(*GetServiceByServiceIDOK), nil
 
 }
 
 /*
-V1MetadataServicesByServiceIDPut updates service
-
-Updates a service by service ID
+GetServices gets all registered services
 */
-func (a *Client) V1MetadataServicesByServiceIDPut(params *V1MetadataServicesByServiceIDPutParams) (*V1MetadataServicesByServiceIDPutOK, error) {
+func (a *Client) GetServices(params *GetServicesParams) (*GetServicesOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
-		params = NewV1MetadataServicesByServiceIDPutParams()
+		params = NewGetServicesParams()
 	}
 
 	result, err := a.transport.Submit(&runtime.ClientOperation{
-		ID:                 "V1MetadataServicesByServiceIdPut",
-		Method:             "PUT",
-		PathPattern:        "/v1/metadata/services/{serviceId}",
-		ProducesMediaTypes: []string{"application/json"},
-		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"https"},
-		Params:             params,
-		Reader:             &V1MetadataServicesByServiceIDPutReader{formats: a.formats},
-		Context:            params.Context,
-		Client:             params.HTTPClient,
-	})
-	if err != nil {
-		return nil, err
-	}
-	return result.(*V1MetadataServicesByServiceIDPutOK), nil
-
-}
-
-/*
-V1MetadataServicesGet gets services
-
-Gets all registered services
-*/
-func (a *Client) V1MetadataServicesGet(params *V1MetadataServicesGetParams) (*V1MetadataServicesGetOK, error) {
-	// TODO: Validate the params before sending
-	if params == nil {
-		params = NewV1MetadataServicesGetParams()
-	}
-
-	result, err := a.transport.Submit(&runtime.ClientOperation{
-		ID:                 "V1MetadataServicesGet",
+		ID:                 "getServices",
 		Method:             "GET",
 		PathPattern:        "/v1/metadata/services",
-		ProducesMediaTypes: []string{"application/json"},
-		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"https"},
+		ProducesMediaTypes: []string{""},
+		ConsumesMediaTypes: []string{""},
+		Schemes:            []string{"http"},
 		Params:             params,
-		Reader:             &V1MetadataServicesGetReader{formats: a.formats},
+		Reader:             &GetServicesReader{formats: a.formats},
 		Context:            params.Context,
 		Client:             params.HTTPClient,
 	})
 	if err != nil {
 		return nil, err
 	}
-	return result.(*V1MetadataServicesGetOK), nil
+	return result.(*GetServicesOK), nil
 
 }
 
 /*
-V1MetadataServicesPost registers service
-
-Registers a new service
+RegisterService registers a new service
 */
-func (a *Client) V1MetadataServicesPost(params *V1MetadataServicesPostParams) (*V1MetadataServicesPostOK, error) {
+func (a *Client) RegisterService(params *RegisterServiceParams) (*RegisterServiceOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
-		params = NewV1MetadataServicesPostParams()
+		params = NewRegisterServiceParams()
 	}
 
 	result, err := a.transport.Submit(&runtime.ClientOperation{
-		ID:                 "V1MetadataServicesPost",
+		ID:                 "registerService",
 		Method:             "POST",
 		PathPattern:        "/v1/metadata/services",
-		ProducesMediaTypes: []string{"application/json"},
-		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"https"},
+		ProducesMediaTypes: []string{""},
+		ConsumesMediaTypes: []string{""},
+		Schemes:            []string{"http"},
 		Params:             params,
-		Reader:             &V1MetadataServicesPostReader{formats: a.formats},
+		Reader:             &RegisterServiceReader{formats: a.formats},
 		Context:            params.Context,
 		Client:             params.HTTPClient,
 	})
 	if err != nil {
 		return nil, err
 	}
-	return result.(*V1MetadataServicesPostOK), nil
+	return result.(*RegisterServiceOK), nil
+
+}
+
+/*
+UpdateService updates a service by service ID
+*/
+func (a *Client) UpdateService(params *UpdateServiceParams) (*UpdateServiceOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewUpdateServiceParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "updateService",
+		Method:             "PUT",
+		PathPattern:        "/v1/metadata/services/{serviceId}",
+		ProducesMediaTypes: []string{""},
+		ConsumesMediaTypes: []string{""},
+		Schemes:            []string{"http"},
+		Params:             params,
+		Reader:             &UpdateServiceReader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*UpdateServiceOK), nil
 
 }
 

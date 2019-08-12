@@ -11,12 +11,12 @@ import (
 	"github.com/go-openapi/swag"
 )
 
-// MetadataErrorResponse MetadataErrorResponse
+// MetadataErrorResponse metadata error response
 // swagger:model MetadataErrorResponse
 type MetadataErrorResponse struct {
 
 	// code
-	Code int32 `json:"code,omitempty"`
+	Code int64 `json:"code,omitempty"`
 
 	// error
 	Error string `json:"error,omitempty"`

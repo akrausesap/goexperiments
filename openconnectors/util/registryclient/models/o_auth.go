@@ -13,7 +13,7 @@ import (
 	"github.com/go-openapi/validate"
 )
 
-// OAuth OAuth
+// OAuth o auth
 // swagger:model OAuth
 type OAuth struct {
 
@@ -27,7 +27,8 @@ type OAuth struct {
 
 	// url
 	// Required: true
-	URL *string `json:"url"`
+	// Format: uri
+	URL *strfmt.URI `json:"url"`
 }
 
 // Validate validates this o auth
@@ -73,6 +74,10 @@ func (m *OAuth) validateClientSecret(formats strfmt.Registry) error {
 func (m *OAuth) validateURL(formats strfmt.Registry) error {
 
 	if err := validate.Required("url", "body", m.URL); err != nil {
+		return err
+	}
+
+	if err := validate.FormatOf("url", "body", "uri", m.URL.String(), formats); err != nil {
 		return err
 	}
 

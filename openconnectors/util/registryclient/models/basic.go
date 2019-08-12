@@ -11,7 +11,7 @@ import (
 	"github.com/go-openapi/swag"
 )
 
-// Basic Basic
+// Basic basic
 // swagger:model Basic
 type Basic struct {
 

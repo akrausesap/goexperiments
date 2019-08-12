@@ -1,61 +1,58 @@
 {
   "swagger": "2.0",
   "info": {
-    "version": "1.0.0",
     "title": "Kyma Application Registry API",
-    "contact": {}
+    "version": "1.0.0"
   },
-  "host": "www.example.com",
-  "basePath": "/",
-  "schemes": [
-    "https"
-  ],
-  "consumes": [
-    "application/json"
-  ],
-  "produces": [
-    "application/json"
-  ],
   "paths": {
     "/v1/health": {
       "get": {
-        "description": "Returns health of a service",
-        "summary": "getHealth",
-        "tags": [
-          "health"
-        ],
-        "operationId": "V1HealthGet",
-        "deprecated": false,
-        "produces": [
-          "application/json"
-        ],
         "parameters": [],
         "responses": {
           "200": {
-            "description": "The service is in a good health",
-            "headers": {}
+            "description": "The service is in a good health"
           }
-        }
+        },
+        "tags": [
+          "health"
+        ],
+        "operationId": "getHealth",
+        "summary": "Returns health of a service"
       }
     },
     "/v1/metadata/services": {
-      "post": {
-        "description": "Registers a new service",
-        "summary": "registerService",
+      "get": {
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "schema": {
+              "items": {
+                "$ref": "#/definitions/Service"
+              },
+              "type": "array"
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "schema": {
+              "$ref": "#/definitions/MetadataErrorResponse"
+            }
+          }
+        },
         "tags": [
           "services"
         ],
-        "operationId": "V1MetadataServicesPost",
-        "deprecated": false,
-        "produces": [
-          "application/json"
-        ],
+        "operationId": "getServices",
+        "summary": "Gets all registered services"
+      },
+      "post": {
         "parameters": [
           {
-            "name": "body",
-            "in": "body",
-            "required": true,
             "description": "Service object to be registered",
+            "in": "body",
+            "name": "body",
+            "required": true,
             "schema": {
               "$ref": "#/definitions/ServiceDetails"
             }
@@ -66,8 +63,7 @@
             "description": "Successful operation",
             "schema": {
               "$ref": "#/definitions/ServiceId"
-            },
-            "headers": {}
+            }
           },
           "400": {
             "description": "Bad request",
@@ -75,66 +71,64 @@
               "$ref": "#/definitions/MetadataErrorResponse"
             }
           },
-          "default": {
+          "500": {
             "description": "Internal server error",
             "schema": {
               "$ref": "#/definitions/MetadataErrorResponse"
             }
           }
-        }
-      },
-      "get": {
-        "description": "Gets all registered services",
-        "summary": "getServices",
+        },
         "tags": [
           "services"
         ],
-        "operationId": "V1MetadataServicesGet",
-        "deprecated": false,
-        "produces": [
-          "application/json"
-        ],
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": "Successful operation",
-            "schema": {
-              "type": "array",
-              "items": {
-                "$ref": "#/definitions/Service"
-              }
-            },
-            "headers": {}
-          },
-          "default": {
-            "description": "Internal server error",
-            "schema": {
-              "$ref": "#/definitions/MetadataErrorResponse"
-            }
-          }
-        }
+        "operationId": "registerService",
+        "summary": "Registers a new service"
       }
     },
     "/v1/metadata/services/{serviceId}": {
-      "get": {
-        "description": "Gets a service by service ID",
-        "summary": "getServiceByServiceId",
+      "delete": {
+        "parameters": [
+          {
+            "description": "ID of a service",
+            "format": "uuid",
+            "in": "path",
+            "name": "serviceId",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful operation"
+          },
+          "404": {
+            "description": "Service not found",
+            "schema": {
+              "$ref": "#/definitions/MetadataErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "schema": {
+              "$ref": "#/definitions/MetadataErrorResponse"
+            }
+          }
+        },
         "tags": [
           "services"
         ],
-        "operationId": "V1MetadataServicesByServiceIdGet",
-        "deprecated": false,
-        "produces": [
-          "application/json"
-        ],
+        "operationId": "deleteServiceByServiceId",
+        "summary": "Deletes a service by service ID"
+      },
+      "get": {
         "parameters": [
           {
-            "name": "serviceId",
-            "in": "path",
-            "required": true,
-            "type": "string",
+            "description": "ID of a service",
             "format": "uuid",
-            "description": "ID of a service"
+            "in": "path",
+            "name": "serviceId",
+            "required": true,
+            "type": "string"
           }
         ],
         "responses": {
@@ -142,8 +136,7 @@
             "description": "Successful operation",
             "schema": {
               "$ref": "#/definitions/ServiceDetails"
-            },
-            "headers": {}
+            }
           },
           "404": {
             "description": "Service not found",
@@ -151,39 +144,34 @@
               "$ref": "#/definitions/MetadataErrorResponse"
             }
           },
-          "default": {
+          "500": {
             "description": "Internal server error",
             "schema": {
               "$ref": "#/definitions/MetadataErrorResponse"
             }
           }
-        }
-      },
-      "put": {
-        "description": "Updates a service by service ID",
-        "summary": "updateService",
+        },
         "tags": [
           "services"
         ],
-        "operationId": "V1MetadataServicesByServiceIdPut",
-        "deprecated": false,
-        "produces": [
-          "application/json"
-        ],
+        "operationId": "getServiceByServiceId",
+        "summary": "Gets a service by service ID"
+      },
+      "put": {
         "parameters": [
           {
-            "name": "serviceId",
-            "in": "path",
-            "required": true,
-            "type": "string",
+            "description": "ID of a service",
             "format": "uuid",
-            "description": "ID of a service"
+            "in": "path",
+            "name": "serviceId",
+            "required": true,
+            "type": "string"
           },
           {
-            "name": "body",
-            "in": "body",
-            "required": true,
             "description": "Service object to be stored",
+            "in": "body",
+            "name": "body",
+            "required": true,
             "schema": {
               "$ref": "#/definitions/ServiceUpdate"
             }
@@ -191,8 +179,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Successful operation",
-            "headers": {}
+            "description": "Successful operation"
           },
           "404": {
             "description": "Service not found",
@@ -200,222 +187,94 @@
               "$ref": "#/definitions/MetadataErrorResponse"
             }
           },
-          "default": {
+          "500": {
             "description": "Internal server error",
             "schema": {
               "$ref": "#/definitions/MetadataErrorResponse"
             }
           }
-        }
-      },
-      "delete": {
-        "description": "Deletes a service by service ID",
-        "summary": "deleteServiceByServiceId",
+        },
         "tags": [
           "services"
         ],
-        "operationId": "V1MetadataServicesByServiceIdDelete",
-        "deprecated": false,
-        "produces": [
-          "application/json"
-        ],
-        "parameters": [
-          {
-            "name": "serviceId",
-            "in": "path",
-            "required": true,
-            "type": "string",
-            "format": "uuid",
-            "description": "ID of a service"
-          }
-        ],
-        "responses": {
-          "204": {
-            "description": "Successful operation",
-            "headers": {}
-          },
-          "404": {
-            "description": "Service not found",
-            "schema": {
-              "$ref": "#/definitions/MetadataErrorResponse"
-            }
-          },
-          "default": {
-            "description": "Internal server error",
-            "schema": {
-              "$ref": "#/definitions/MetadataErrorResponse"
-            }
-          }
-        }
+        "operationId": "updateService",
+        "summary": "Updates a service by service ID"
       }
     }
   },
   "definitions": {
-    "ServiceId": {
-      "title": "ServiceId",
-      "type": "object",
-      "properties": {
-        "id": {
-          "type": "string",
-          "format": "uuid"
-        }
-      }
-    },
-    "ServiceDetails": {
-      "title": "ServiceDetails",
-      "type": "object",
-      "properties": {
-        "provider": {
-          "type": "string"
-        },
-        "name": {
-          "type": "string"
-        },
-        "description": {
-          "type": "string"
-        },
-        "shortDescription": {
-          "type": "string"
-        },
-        "identifier": {
-          "type": "string"
-        },
-        "labels": {
-          "type": "object",
-          "additionalProperties": {
-            "type": "string"
-          }
-        },
-        "api": {
-          "$ref": "#/definitions/Api"
-        },
-        "events": {
-          "$ref": "#/definitions/Events"
-        },
-        "documentation": {
-          "$ref": "#/definitions/Documentation"
-        }
-      },
-      "required": [
-        "provider",
-        "name",
-        "description"
-      ]
-    },
-    "ServiceUpdate": {
-      "title": "ServiceUpdate",
-      "type": "object",
-      "properties": {
-        "provider": {
-          "type": "string"
-        },
-        "name": {
-          "type": "string"
-        },
-        "description": {
-          "type": "string"
-        },
-        "shortDescription": {
-          "type": "string"
-        },
-        "identifier": {
-          "type": "string"
-        },
-        "labels": {
-          "type": "object",
-          "additionalProperties": {
-            "type": "string"
-          }
-        },
-        "api": {
-          "$ref": "#/definitions/Api"
-        },
-        "events": {
-          "$ref": "#/definitions/Events"
-        },
-        "documentation": {
-          "$ref": "#/definitions/Documentation"
-        }
-      },
-      "required": [
-        "provider",
-        "name",
-        "description"
-      ]
-    },
-    "Service": {
-      "title": "Service",
-      "type": "object",
-      "properties": {
-        "id": {
-          "type": "string",
-          "format": "uuid"
-        },
-        "provider": {
-          "type": "string"
-        },
-        "name": {
-          "type": "string"
-        },
-        "description": {
-          "type": "string"
-        },
-        "identifier": {
-          "type": "string"
-        },
-        "labels": {
-          "type": "object",
-          "additionalProperties": {
-            "type": "string"
-          }
-        }
-      }
-    },
     "Api": {
-      "title": "Api",
-      "type": "object",
       "properties": {
-        "targetUrl": {
+        "ApiType": {
+          "description": "API type, for example OData",
+          "type": "string"
+        },
+        "SpecificationUrl": {
+          "format": "uri",
           "type": "string"
         },
         "credentials": {
           "$ref": "#/definitions/ApiCredentials"
         },
+        "requestParameters": {
+          "$ref": "#/definitions/RequestParameters"
+        },
         "spec": {
           "description": "OpenApi v2 swagger file: https://github.com/OAI/OpenAPI-Specification/blob/master/schemas/v2.0/schema.json",
           "type": "object"
         },
-        "headers": {
-          "description": "Additional headers to be injected during proxying requests",
-          "type": "object",
-          "additionalProperties": {
-            "type": "object"
-          }
+        "specificationCredentials": {
+          "$ref": "#/definitions/SpecificationCredentials"
         },
-        "queryParameters": {
-          "description": "Additional query parameters to be injected during proxying requests",
-          "type": "object",
-          "additionalProperties": {
-            "type": "object"
-          }
+        "specificationRequestParameters": {
+          "$ref": "#/definitions/RequestParameters"
         },
-        "SpecificationUrl": {
-          "type": "string"
-        },
-        "ApiType": {
-          "description": "API type, for example OData",
+        "targetUrl": {
+          "format": "uri",
           "type": "string"
         }
       },
       "required": [
         "targetUrl"
-      ]
+      ],
+      "type": "object"
+    },
+    "ApiCredentials": {
+      "properties": {
+        "basic": {
+          "$ref": "#/definitions/Basic"
+        },
+        "certificateGen": {
+          "$ref": "#/definitions/CertificateGen"
+        },
+        "oauth": {
+          "$ref": "#/definitions/OAuth"
+        }
+      },
+      "type": "object"
+    },
+    "ApiCredentialsUpdate": {
+      "properties": {
+        "basic": {
+          "$ref": "#/definitions/Basic"
+        },
+        "certificateGen": {
+          "$ref": "#/definitions/CertificateGenUpdate"
+        },
+        "oauth": {
+          "$ref": "#/definitions/OAuth"
+        }
+      },
+      "type": "object"
     },
     "ApiUpdate": {
-      "title": "ApiUpdate",
-      "type": "object",
       "properties": {
-        "targetUrl": {
+        "ApiType": {
+          "description": "API type, for example OData",
+          "type": "string"
+        },
+        "SpecificationUrl": {
+          "format": "uri",
           "type": "string"
         },
         "credentials": {
@@ -425,71 +284,55 @@
           "description": "OpenApi v2 swagger file: https://github.com/OAI/OpenAPI-Specification/blob/master/schemas/v2.0/schema.json",
           "type": "object"
         },
-        "SpecificationUrl": {
-          "type": "string"
-        },
-        "ApiType": {
-          "description": "API type, for example OData",
+        "targetUrl": {
+          "format": "uri",
           "type": "string"
         }
       },
       "required": [
         "targetUrl"
-      ]
+      ],
+      "type": "object"
     },
-    "Events": {
-      "title": "Events",
-      "type": "object",
+    "Basic": {
       "properties": {
-        "spec": {
-          "description": "AsyncApi file v1: https://github.com/asyncapi/asyncapi/blob/develop/schema/asyncapi.json",
-          "type": "object"
-        }
-      }
-    },
-    "Documentation": {
-      "title": "Documentation",
-      "type": "object",
-      "properties": {
-        "displayName": {
+        "password": {
           "type": "string"
         },
-        "description": {
+        "username": {
           "type": "string"
-        },
-        "type": {
-          "type": "string"
-        },
-        "tags": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        },
-        "docs": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/Document"
-          }
         }
       },
-      "required": [
-        "displayName",
-        "description",
-        "type"
-      ]
+      "type": "object"
+    },
+    "CertificateGen": {
+      "properties": {
+        "certificate": {
+          "type": "string"
+        },
+        "commonName": {
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "CertificateGenUpdate": {
+      "properties": {
+        "commonName": {
+          "type": "string"
+        }
+      },
+      "type": "object"
     },
     "Document": {
-      "title": "Document",
-      "type": "object",
       "properties": {
+        "source": {
+          "type": "string"
+        },
         "title": {
           "type": "string"
         },
         "type": {
-          "type": "string"
-        },
-        "source": {
           "type": "string"
         }
       },
@@ -497,77 +340,70 @@
         "title",
         "type",
         "source"
-      ]
+      ],
+      "type": "object"
     },
-    "ApiCredentials": {
-      "title": "ApiCredentials",
-      "type": "object",
+    "Documentation": {
       "properties": {
-        "oauth": {
-          "$ref": "#/definitions/OAuth"
+        "tags": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
         },
-        "basic": {
-          "$ref": "#/definitions/Basic"
-        },
-        "certificateGen": {
-          "$ref": "#/definitions/CertificateGen"
-        },
-        "headers": {
-          "description": "Additional headers to be injected during auth requests",
-          "type": "object",
-          "additionalProperties": {
-            "type": "object"
-          }
-        },
-        "queryParameters": {
-          "description": "Additional query parameters to be injected during auth requests",
-          "type": "object",
-          "additionalProperties": {
-            "type": "object"
-          }
-        }
-      }
-    },
-    "ApiCredentialsUpdate": {
-      "title": "ApiCredentialsUpdate",
-      "type": "object",
-      "properties": {
-        "oauth": {
-          "$ref": "#/definitions/OAuth"
-        },
-        "basic": {
-          "$ref": "#/definitions/Basic"
-        },
-        "certificateGen": {
-          "$ref": "#/definitions/CertificateGenUpdate"
-        },
-        "headers": {
-          "description": "Additional headers to be injected during auth requests",
-          "type": "object",
-          "additionalProperties": {
-            "type": "object"
-          }
-        },
-        "queryParameters": {
-          "description": "Additional query parameters to be injected during auth requests",
-          "type": "object",
-          "additionalProperties": {
-            "type": "object"
-          }
-        }
-      }
-    },
-    "OAuth": {
-      "title": "OAuth",
-      "type": "object",
-      "properties": {
-        "url": {
+        "description": {
           "type": "string"
         },
+        "displayName": {
+          "type": "string"
+        },
+        "docs": {
+          "items": {
+            "$ref": "#/definitions/Document"
+          },
+          "type": "array"
+        },
+        "type": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "displayName",
+        "description",
+        "type"
+      ],
+      "type": "object"
+    },
+    "Events": {
+      "properties": {
+        "spec": {
+          "description": "AsyncApi file v1: https://github.com/asyncapi/asyncapi/blob/develop/schema/asyncapi.json",
+          "type": "object"
+        }
+      },
+      "type": "object"
+    },
+    "MetadataErrorResponse": {
+      "properties": {
+        "code": {
+          "type": "integer"
+        },
+        "error": {
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "OAuth": {
+      "properties": {
         "clientId": {
           "type": "string"
         },
         "clientSecret": {
+          "type": "string"
+        },
+        "url": {
+          "format": "uri",
           "type": "string"
         }
       },
@@ -575,67 +411,167 @@
         "url",
         "clientId",
         "clientSecret"
-      ]
+      ],
+      "type": "object"
     },
-    "Basic": {
-      "title": "Basic",
-      "type": "object",
+    "RequestParameters": {
       "properties": {
-        "username": {
+        "headers": {
+          "additionalProperties": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "description": "Additional headers to be injected during auth requests",
+          "type": "object"
+        },
+        "queryParameters": {
+          "additionalProperties": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "description": "Additional query parameters to be injected during auth requests",
+          "type": "object"
+        }
+      },
+      "type": "object"
+    },
+    "Service": {
+      "properties": {
+        "description": {
           "type": "string"
         },
-        "password": {
-          "type": "string"
-        }
-      }
-    },
-    "CertificateGen": {
-      "title": "CertificateGen",
-      "type": "object",
-      "properties": {
-        "commonName": {
+        "id": {
+          "format": "uuid",
           "type": "string"
         },
-        "certificate": {
+        "identifier": {
           "type": "string"
-        }
-      }
-    },
-    "CertificateGenUpdate": {
-      "title": "CertificateGenUpdate",
-      "type": "object",
-      "properties": {
-        "commonName": {
-          "type": "string"
-        }
-      }
-    },
-    "MetadataErrorResponse": {
-      "title": "MetadataErrorResponse",
-      "type": "object",
-      "properties": {
-        "code": {
-          "type": "integer",
-          "format": "int32"
         },
-        "error": {
+        "labels": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "type": "object"
+        },
+        "name": {
+          "type": "string"
+        },
+        "provider": {
           "type": "string"
         }
-      }
+      },
+      "type": "object"
+    },
+    "ServiceDetails": {
+      "properties": {
+        "api": {
+          "$ref": "#/definitions/Api"
+        },
+        "description": {
+          "type": "string"
+        },
+        "documentation": {
+          "$ref": "#/definitions/Documentation"
+        },
+        "events": {
+          "$ref": "#/definitions/Events"
+        },
+        "identifier": {
+          "type": "string"
+        },
+        "labels": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "type": "object"
+        },
+        "name": {
+          "type": "string"
+        },
+        "provider": {
+          "type": "string"
+        },
+        "shortDescription": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "provider",
+        "name",
+        "description"
+      ],
+      "type": "object"
+    },
+    "ServiceId": {
+      "properties": {
+        "id": {
+          "format": "uuid",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "ServiceUpdate": {
+      "properties": {
+        "api": {
+          "$ref": "#/definitions/Api"
+        },
+        "description": {
+          "type": "string"
+        },
+        "documentation": {
+          "$ref": "#/definitions/Documentation"
+        },
+        "events": {
+          "$ref": "#/definitions/Events"
+        },
+        "identifier": {
+          "type": "string"
+        },
+        "labels": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "type": "object"
+        },
+        "name": {
+          "type": "string"
+        },
+        "provider": {
+          "type": "string"
+        },
+        "shortDescription": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "provider",
+        "name",
+        "description"
+      ],
+      "type": "object"
+    },
+    "SpecificationCredentials": {
+      "properties": {
+        "basic": {
+          "$ref": "#/definitions/Basic"
+        },
+        "oauth": {
+          "$ref": "#/definitions/OAuth"
+        }
+      },
+      "type": "object"
     }
   },
   "tags": [
     {
-      "name": "Application Registry",
-      "description": "API for registering services in Kyma."
-    },
-    {
-      "name": "health",
-      "description": ""
-    },
-    {
-      "name": "services",
-      "description": ""
+      "description": "API for registering services in Kyma.",
+      "name": "Application Registry"
     }
-  ]
+  ],
+  "x-components": {}
 }

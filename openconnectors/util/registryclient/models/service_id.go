@@ -13,7 +13,7 @@ import (
 	"github.com/go-openapi/validate"
 )
 
-// ServiceID ServiceId
+// ServiceID service Id
 // swagger:model ServiceId
 type ServiceID struct {
 

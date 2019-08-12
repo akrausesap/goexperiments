@@ -11,7 +11,7 @@ import (
 	"github.com/go-openapi/swag"
 )
 
-// Events Events
+// Events events
 // swagger:model Events
 type Events struct {
 

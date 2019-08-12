@@ -16,8 +16,8 @@ import (
 //RegisterAPIMetadata interacts with the Kyma Application Registry
 func RegisterAPIMetadata(tlsEnabled bool, registryHost string, applicationName string, metadataProvider string, metadataName string,
 	metadataDescription string, connectorInstanceID string, connectorURL string, apiSpecification interface{},
-	authorizationHeader map[string]interface{}) error {
-
+	authorizationHeader map[string][]string) error {
+	targetURI := strfmt.URI(connectorURL)
 	var scheme []string
 	if tlsEnabled {
 		scheme = []string{"https"}
@@ -26,7 +26,7 @@ func RegisterAPIMetadata(tlsEnabled bool, registryHost string, applicationName s
 	}
 	transport := httptransport.New(registryHost, fmt.Sprintf("/%s/", applicationName), scheme)
 	client := apiclient.New(transport, strfmt.Default)
-	params := services.NewV1MetadataServicesPostParams()
+	params := services.NewRegisterServiceParams()
 	params.SetTimeout(30 * time.Second)
 
 	body := &models.ServiceDetails{
@@ -35,16 +35,18 @@ func RegisterAPIMetadata(tlsEnabled bool, registryHost string, applicationName s
 		Description: &metadataDescription,
 		Identifier:  connectorInstanceID,
 		API: &models.API{
-			TargetURL: &connectorURL,
+			TargetURL: &targetURI,
 			Spec:      apiSpecification,
-			Headers:   authorizationHeader,
-			APIType:   "REST",
+			RequestParameters: &models.RequestParameters{
+				Headers: authorizationHeader,
+			},
+			APIType: "REST",
 		},
 	}
 
 	params.SetBody(body)
 
-	_, err := client.Services.V1MetadataServicesPost(params)
+	_, err := client.Services.RegisterService(params)
 
 	if err != nil {
 		return err

@@ -64,8 +64,8 @@ var mutex = &sync.Mutex{}
 // +kubebuilder:rbac:groups=openconnectors.incubator.kyma-project.io,resources=connectorinstances/status,verbs=get;update;patch
 // +kubebuilder:rbac:groups=applicationconnector.kyma-project.io,resources=applications,verbs=get;update;patch;create;list;watch
 
-func createOpenConnectorsAuthorizationHeader(userSecret string, orgSecret string, APIKey string) (result map[string]interface{}) {
-	header := make(map[string]interface{})
+func createOpenConnectorsAuthorizationHeader(userSecret string, orgSecret string, APIKey string) (result map[string][]string) {
+	header := make(map[string][]string)
 
 	header["Authorization"] = []string{
 		fmt.Sprintf("User %s, Organization %s, Element %s",

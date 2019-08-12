@@ -13,7 +13,7 @@ import (
 	"github.com/go-openapi/validate"
 )
 
-// ServiceUpdate ServiceUpdate
+// ServiceUpdate service update
 // swagger:model ServiceUpdate
 type ServiceUpdate struct {
 

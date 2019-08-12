@@ -15,7 +15,7 @@ import (
 	"github.com/go-openapi/validate"
 )
 
-// Documentation Documentation
+// Documentation documentation
 // swagger:model Documentation
 type Documentation struct {
 

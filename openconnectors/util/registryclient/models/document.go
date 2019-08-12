@@ -13,7 +13,7 @@ import (
 	"github.com/go-openapi/validate"
 )
 
-// Document Document
+// Document document
 // swagger:model Document
 type Document struct {
 

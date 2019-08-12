@@ -12,7 +12,7 @@ import (
 	"github.com/go-openapi/swag"
 )
 
-// APICredentialsUpdate ApiCredentialsUpdate
+// APICredentialsUpdate Api credentials update
 // swagger:model ApiCredentialsUpdate
 type APICredentialsUpdate struct {
 
@@ -22,14 +22,8 @@ type APICredentialsUpdate struct {
 	// certificate gen
 	CertificateGen *CertificateGenUpdate `json:"certificateGen,omitempty"`
 
-	// Additional headers to be injected during auth requests
-	Headers map[string]interface{} `json:"headers,omitempty"`
-
 	// oauth
 	Oauth *OAuth `json:"oauth,omitempty"`
-
-	// Additional query parameters to be injected during auth requests
-	QueryParameters map[string]interface{} `json:"queryParameters,omitempty"`
 }
 
 // Validate validates this Api credentials update

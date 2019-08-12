@@ -12,29 +12,22 @@ import (
 	"github.com/go-openapi/swag"
 )
 
-// APICredentials Api credentials
-// swagger:model ApiCredentials
-type APICredentials struct {
+// SpecificationCredentials specification credentials
+// swagger:model SpecificationCredentials
+type SpecificationCredentials struct {
 
 	// basic
 	Basic *Basic `json:"basic,omitempty"`
-
-	// certificate gen
-	CertificateGen *CertificateGen `json:"certificateGen,omitempty"`
 
 	// oauth
 	Oauth *OAuth `json:"oauth,omitempty"`
 }
 
-// Validate validates this Api credentials
-func (m *APICredentials) Validate(formats strfmt.Registry) error {
+// Validate validates this specification credentials
+func (m *SpecificationCredentials) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateBasic(formats); err != nil {
-		res = append(res, err)
-	}
-
-	if err := m.validateCertificateGen(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -48,7 +41,7 @@ func (m *APICredentials) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *APICredentials) validateBasic(formats strfmt.Registry) error {
+func (m *SpecificationCredentials) validateBasic(formats strfmt.Registry) error {
 
 	if swag.IsZero(m.Basic) { // not required
 		return nil
@@ -66,25 +59,7 @@ func (m *APICredentials) validateBasic(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *APICredentials) validateCertificateGen(formats strfmt.Registry) error {
-
-	if swag.IsZero(m.CertificateGen) { // not required
-		return nil
-	}
-
-	if m.CertificateGen != nil {
-		if err := m.CertificateGen.Validate(formats); err != nil {
-			if ve, ok := err.(*errors.Validation); ok {
-				return ve.ValidateName("certificateGen")
-			}
-			return err
-		}
-	}
-
-	return nil
-}
-
-func (m *APICredentials) validateOauth(formats strfmt.Registry) error {
+func (m *SpecificationCredentials) validateOauth(formats strfmt.Registry) error {
 
 	if swag.IsZero(m.Oauth) { // not required
 		return nil
@@ -103,7 +78,7 @@ func (m *APICredentials) validateOauth(formats strfmt.Registry) error {
 }
 
 // MarshalBinary interface implementation
-func (m *APICredentials) MarshalBinary() ([]byte, error) {
+func (m *SpecificationCredentials) MarshalBinary() ([]byte, error) {
 	if m == nil {
 		return nil, nil
 	}
@@ -111,8 +86,8 @@ func (m *APICredentials) MarshalBinary() ([]byte, error) {
 }
 
 // UnmarshalBinary interface implementation
-func (m *APICredentials) UnmarshalBinary(b []byte) error {
-	var res APICredentials
+func (m *SpecificationCredentials) UnmarshalBinary(b []byte) error {
+	var res SpecificationCredentials
 	if err := swag.ReadJSON(b, &res); err != nil {
 		return err
 	}
